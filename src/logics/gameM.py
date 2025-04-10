@@ -1,4 +1,3 @@
-from os import P_OVERLAY
 from fastapi import APIRouter, Request, Security, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
