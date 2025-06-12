@@ -1,13 +1,22 @@
+from uuid import UUID
 from typing import Annotated
 from fastapi import APIRouter
 from fastapi.params import Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import (
+    Response,
+    JSONResponse
+)
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
+
+from pydantic import create_model
 
 from api.v1.authentication.validation import get_current_active_auth_user
+
 from core.schemes import (
     UserSchema,
+    UsersSchema,
     UserUpdateSchema
 )
 
@@ -17,6 +26,7 @@ from core.database import (
 
 from api.v1.crud import (
     user_delete,
+    user_get_all,
     user_get_by_id,
     user_update
 )
@@ -48,6 +58,63 @@ async def user_get(
         Depends(get_current_active_auth_user)
     ]
 ):
+    return user
+
+
+# User/All GET ------<
+@router.get(
+    "/all",
+    response_model=UsersSchema
+)
+async def user_all_get(
+    verify: Annotated[
+        UserSchema,
+        Depends(get_current_active_auth_user)
+    ],
+    session: Annotated[
+        AsyncSession,
+        Depends(db_control.session_getter)
+    ]
+):
+
+    filters = create_model("", profile_visibility=(bool, ...)); filters = filters(profile_visibility=True)
+
+    users = await user_get_all(session=session, filters=filters)
+
+    return users
+
+
+# User{id} GET ------<
+@router.get(
+    "/{id}",
+    response_model=UserSchema
+)
+async def user_get_id(
+    id: UUID,
+    verify: Annotated[
+        UserSchema,
+        Depends(get_current_active_auth_user)
+    ],
+    session: Annotated[
+        AsyncSession,
+        Depends(db_control.session_getter)
+    ]
+):
+
+    no_content_response = Response(
+        status_code=status.HTTP_204_NO_CONTENT
+    )
+
+    user = await user_get_by_id(session=session, userid=str(id))
+
+    if not user:
+        return no_content_response
+
+    if not user.profile.visibility:
+        return no_content_response
+
+    user = user.model_copy(update={"password": "", "email": ""})
+
     return user
 
 

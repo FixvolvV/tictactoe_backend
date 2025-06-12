@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.api.v1.crud import (
+from api.v1.crud import ( #pyright:ignore
     lobby_add,
     lobby_delete,
     lobby_get,
@@ -25,14 +25,14 @@ from app.api.v1.crud import (
     user_delete
 )
 
-from app.core.schemes import (
+from core.schemes import ( #pyright:ignore
     UsersSchema,
     LobbySchema,
     LobbiesSchema,
     ProfileSchema,
     RegisterSchema,
 )
-from app.core.utils import (
+from core.utils import ( #pyright:ignore
     lobbystage,
     gametype
 )
@@ -190,3 +190,4 @@ async def test_lobby_crud(test_session_getter: AsyncSession):
     await lobby_delete(test_session_getter, created_lobby_id)
     all_lobbies = await lobby_get_all(test_session_getter, empty)
     assert len(all_lobbies.lobbies) == 0 
+    

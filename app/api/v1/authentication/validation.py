@@ -1,5 +1,9 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, Form
+from fastapi import (
+    Depends,
+    HTTPException,
+    Form
+)
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import (

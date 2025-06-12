@@ -7,7 +7,11 @@ from pydantic import (
 )
 
 from core.utils import roles
-from .profile_schemes import ProfileSchema
+from .profile_schemes import (
+    ProfileSchema,
+    ProfileUpdateSchema,
+    AdminProfileUpdateSchema
+)
 
 class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -80,10 +84,15 @@ class UserUpdateSchema(BaseModel):
     username: str | None = None
     password: str | None = None
     email: str | None = None
+    profile: ProfileUpdateSchema | None = None
 
-class AdminUserUpdateSchema(UserUpdateSchema):
+class AdminUserUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    username: str | None = None
+    password: str | None = None
+    email: str | None = None
     isActive: bool | None = None
     role: roles | None = None 
     time_create: datetime | None = None
+    profile: AdminProfileUpdateSchema | None = None

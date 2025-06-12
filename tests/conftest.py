@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.core.database import model
+from core.database import model #pyright:ignore
 
 TEST_URL_DB = "postgresql+asyncpg://postgres:admin@localhost:5432/test_db"
 
