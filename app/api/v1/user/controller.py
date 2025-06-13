@@ -12,7 +12,7 @@ from starlette import status
 
 from pydantic import create_model
 
-from api.v1.authentication.validation import get_current_active_auth_user
+from api.v1.validation import get_current_active_auth_user
 
 from core.schemes import (
     UserSchema,

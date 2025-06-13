@@ -70,24 +70,9 @@ async def user_delete(session: AsyncSession, userid: str)  -> None:
 
 
 # Crud Операции для Profile
-async def profile_reset(session: AsyncSession, userid: str) -> None:
-
-    update_data = ProfileSchema(
-        user_id=userid,
-        icon=None,
-        wins=0,
-        loses=0,
-        visibility=True,
-    )
-
-    await ProfileCrud.update_one_by_id(session=session, data_id=userid, values=update_data)
-    await session.commit()
-
-
-async def profile_update(session: AsyncSession, userid: str, update_data: BaseModel) -> None:
-    await ProfileCrud.update_one_by_id(session=session, data_id=userid, values=update_data)
-    await session.commit()
-
+"""
+ Outdate. Я добавил relationship к base_crud. И теперь профили по сути как User и всегда подсасываються.
+"""
 
 # Crud Операции для lobbies
 async def lobby_add(session: AsyncSession, lobbydata: BaseModel) -> str:
@@ -96,12 +81,12 @@ async def lobby_add(session: AsyncSession, lobbydata: BaseModel) -> str:
     return str(lobby.id)
 
 
-async def lobby_get_by_id(session: AsyncSession, lobbyid: str) -> LobbySchema:
+async def lobby_get_by_id(session: AsyncSession, lobbyid: str) -> LobbySchema | None:
     lobby = await LobbyCrud.find_one_or_none_by_id(session=session, data_id=lobbyid)
     await session.commit()
     return LobbySchema.model_validate(lobby)
 
-async def lobby_get(session: AsyncSession, lobbydata: BaseModel) -> LobbySchema:
+async def lobby_get(session: AsyncSession, lobbydata: BaseModel) -> LobbySchema | None:
     lobby = await LobbyCrud.find_one_or_none(session=session, filters=lobbydata)
     await session.commit()
     return LobbySchema.model_validate(lobby)

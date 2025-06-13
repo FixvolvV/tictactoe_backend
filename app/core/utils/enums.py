@@ -11,3 +11,9 @@ class lobbystage(str, enum.Enum):
 
 class gametype(str, enum.Enum):
     INFINITY_TIC_TAC_TOE = "Бесконечные крестики нолики"
+
+class ConnectionState(str, enum.Enum):
+    WAITING = "waiting"
+    READY = "ready"
+    PLAYING = "playing"
+    FINISHED = "finished"

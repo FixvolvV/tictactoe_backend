@@ -9,7 +9,7 @@ from api.v1.authentication.genjwt import (
     create_access_token,
     create_refresh_token,
 )
-from api.v1.authentication.validation import(
+from api.v1.validation import(
     validate_auth_user,
     get_current_auth_user_for_refresh,
     check_register_data
