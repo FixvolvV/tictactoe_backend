@@ -1,7 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from fastapi.params import Depends
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
@@ -26,6 +26,10 @@ from core.database import (
     db_control,
 )
 
+from core.config import (
+    settings
+)
+
 from api.v1.crud import (
     user_add,
     user_get_by_id
@@ -41,12 +45,47 @@ from core.utils import (
 
 # Create http bearer for auto documentation
 http_bearer = HTTPBearer(auto_error=False)
+oauth2_scheme_refresh = OAuth2PasswordBearer(tokenUrl="authentication/refresh")
+
 
 # Token Model 
 class TokenInfo(BaseModel):
     access_token: str
     refresh_token: str | None = None
     token_type: str = "Bearer"
+
+
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+    # Указываем корневой домен с точкой в начале
+    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.jwt.access_token_expire_minutes, # 1 hour for access token
+        path="/",
+        domain=COOKIE_DOMAIN # Используем корневой домен
+    )
+    
+    response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=settings.jwt.refresh_token_expire_days, # 7 days for refresh token
+            path="/",
+            domain=COOKIE_DOMAIN # Используем корневой домен
+        )
+
+# Helper to clear cookies
+def clear_auth_cookies(response: Response):
+    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+    response.delete_cookie(key="access_token", domain=COOKIE_DOMAIN)
+    response.delete_cookie(key="refresh_token", domain=COOKIE_DOMAIN)
 
 
 # Init auth router
@@ -69,7 +108,8 @@ async def get_register_data(
     session: Annotated[
         AsyncSession,
         Depends(db_control.session_getter)
-    ]
+    ],
+    response: Response
 ):
     
     userdata.password = hash_password(userdata.password).decode()
@@ -82,6 +122,8 @@ async def get_register_data(
 
     access_token = create_access_token(JWTCreateSchema.model_validate(user))
     refresh_token = create_refresh_token(JWTCreateSchema.model_validate(user))
+
+    set_auth_cookies(response, access_token, refresh_token) 
 
     return TokenInfo (
         access_token=access_token,
@@ -98,10 +140,14 @@ async def get_login_data(
     user: Annotated[
         UserSchema,
         Depends(validate_auth_user)
-    ]
+    ],
+    response: Response
 ):
     access_token = create_access_token(JWTCreateSchema.model_validate(user))
     refresh_token = create_refresh_token(JWTCreateSchema.model_validate(user))
+
+    set_auth_cookies(response, access_token, refresh_token) 
+
     return TokenInfo(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -118,9 +164,21 @@ async def refresh_token(
     user: Annotated[
         UserSchema,
         Depends(get_current_auth_user_for_refresh)
-    ]
+    ],
+    response: Response
 ):
     access_token = create_access_token(JWTCreateSchema.model_validate(user))
+    refresh_token = create_refresh_token(JWTCreateSchema.model_validate(user))
+
+    set_auth_cookies(response, access_token, refresh_token) 
+
     return TokenInfo(
         access_token=access_token,
+        refresh_token=refresh_token
     )
+
+
+@router.post('/logout')
+async def logout(response: Response):
+    clear_auth_cookies(response)
+    return {"message": "Logged out successfully"}
