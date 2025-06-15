@@ -1,6 +1,6 @@
-from core.utils import ConnectionState
+from core.utils import connectionstate
 
-from api.v1.lobby.manager import (
+from manager import (
     Lobby,
     PlayerConnection
 )
@@ -11,13 +11,13 @@ async def handle_ready(lobby: Lobby, player: PlayerConnection):
 
     await player.websocket.send_json({"event": "you_ready"})
 
-    if lobby.state == ConnectionState.WAITING and all(p.is_ready for p in lobby.players.values()):
-        lobby.state = ConnectionState.READY
+    if lobby.state == connectionstate.WAITING and all(p.is_ready for p in lobby.lobby_data.players):
+        lobby.state = connectionstate.READY
 
         # Переход в PLAYING
         lobby.start_game()
 
-        for p in lobby.players.values():
+        for p in lobby.lobby_data.players:
             await p.websocket.send_json({
                 "event": "start",
                 "symbol": p.symbol,
