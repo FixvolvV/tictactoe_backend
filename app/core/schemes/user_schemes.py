@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
+from fastapi import WebSocket
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -96,3 +96,4 @@ class AdminUserUpdateSchema(BaseModel):
     role: roles | None = None 
     time_create: datetime | None = None
     profile: AdminProfileUpdateSchema | None = None
+

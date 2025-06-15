@@ -1,7 +1,7 @@
 __all__ = (
     "roles",
-    "lobbystage",
     "gametype",
+    "connectionstate",
     "encode_jwt",
     "decode_jwt",
     "hash_password",
@@ -10,8 +10,8 @@ __all__ = (
 
 from .enums import (
     roles,
-    lobbystage,
-    gametype
+    gametype,
+    connectionstate
 )
 
 from .auth_tools import (

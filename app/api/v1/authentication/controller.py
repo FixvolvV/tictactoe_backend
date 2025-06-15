@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,10 +9,11 @@ from api.v1.authentication.genjwt import (
     create_access_token,
     create_refresh_token,
 )
-from api.v1.validation import(
+
+from api.v1.validators import(
     validate_auth_user,
     get_current_auth_user_for_refresh,
-    check_register_data
+    check_recurring_data
 ) 
 
 from core.schemes import (
@@ -63,7 +64,7 @@ router = APIRouter(
 async def get_register_data(
     userdata: Annotated[
         RegisterSchema,
-        Depends(check_register_data)
+        Depends(check_recurring_data)
     ],
     session: Annotated[
         AsyncSession,
@@ -115,8 +116,8 @@ async def get_login_data(
 )
 async def refresh_token(
     user: Annotated[
-    UserSchema,
-    Depends(get_current_auth_user_for_refresh)
+        UserSchema,
+        Depends(get_current_auth_user_for_refresh)
     ]
 ):
     access_token = create_access_token(JWTCreateSchema.model_validate(user))

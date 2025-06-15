@@ -1,5 +1,11 @@
-from datetime import datetime
+from datetime import (
+    datetime,
+    time,
+    timedelta,
+    timezone
+)
 from typing import (
+    Any,
     List,
     Dict,
 ) 
@@ -10,9 +16,10 @@ from pydantic import (
     field_validator,
 )
 
+from core.schemes.user_schemes import UserSchema
 from core.utils import (
-    lobbystage,
-    gametype
+    gametype,
+    connectionstate
 )
 
 
@@ -21,16 +28,27 @@ class LobbySchema(BaseModel):
 
     id: str
     name: str
-    players: List[str]
+    players: List[UserSchema]
+    winner: UserSchema
     field: Dict[str, str]
     gametype: gametype
-    state: lobbystage
-    time_create: datetime
+    gametime: str
+    timecreate: datetime
 
     @field_validator("id", mode='before')
     def to_str(cls, value):
         if value:
             return str(value)
+    
+    @field_validator("gametime", mode="before")
+    def parse_duration(cls, v: timedelta) -> str:
+
+        total_seconds = int(v.total_seconds())
+
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 class LobbiesSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -39,9 +57,11 @@ class LobbiesSchema(BaseModel):
 
 class InitLobbySchema(BaseModel):
 
+    id: str
     name: str
-    players: List[str]
-    gametype: gametype
+    players: List[Any] = []
+    field: Dict[str, str] = {}
+    gametype: gametype 
 
     @field_validator('name')
     def username_validator(cls, value):
@@ -50,3 +70,5 @@ class InitLobbySchema(BaseModel):
         elif len(value) < 2:
             raise ValueError("Lobby Name to small. The nickname for the minimum length is 2")
         return value
+
+

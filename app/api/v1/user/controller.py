@@ -12,7 +12,9 @@ from starlette import status
 
 from pydantic import create_model
 
-from api.v1.validation import get_current_active_auth_user
+from api.v1.validators import(
+    get_current_active_auth_user
+) 
 
 from core.schemes import (
     UserSchema,
@@ -34,6 +36,9 @@ from api.v1.crud import (
 from core.utils import (
     hash_password
 )
+
+
+#TODO Add endpoints for Admin. Update endpoints for Admin usability 
 
 
 # Create http bearer for auto documentation

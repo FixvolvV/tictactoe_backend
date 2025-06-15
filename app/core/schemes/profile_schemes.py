@@ -25,8 +25,10 @@ class ProfileUpdateSchema(BaseModel):
     icon: str | None = None
     visibility: bool | None = None
 
-class AdminProfileUpdateSchema(ProfileUpdateSchema):
+class AdminProfileUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    icon: str | None = None
     wins: int | None = None
     loses: int | None = None
+    visibility: bool | None = None

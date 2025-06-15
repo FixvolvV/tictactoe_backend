@@ -1,22 +1,15 @@
-from uuid import UUID
 from typing import Annotated
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import (
-    Response,
     JSONResponse
 )
 from fastapi.security import HTTPBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from pydantic import create_model
-
-from api.v1.validation import get_current_active_auth_user
+from api.v1.validators import get_current_active_auth_user
 
 from core.schemes import (
-    LobbySchema,
-    LobbiesSchema,
     UserSchema
 )
 
@@ -24,10 +17,8 @@ from core.database import (
     db_control,
 )
 
-from api.v1.crud import (
-    lobby_add
-)
 
+from api.v1.logic.manager import lobby_manager
 
 # Create http bearer for auto documentation
 http_bearer = HTTPBearer(auto_error=False)

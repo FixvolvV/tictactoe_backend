@@ -2,7 +2,6 @@ from typing import Annotated
 from fastapi import (
     Depends,
     HTTPException,
-    Form
 )
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
@@ -20,7 +19,7 @@ from api.v1.crud import (
     user_get_all
 )
 
-from .genjwt import (
+from api.v1.authentication.genjwt import (
     TOKEN_TYPE_FIELD,
     ACCESS_TOKEN_TYPE,
     REFRESH_TOKEN_TYPE,
@@ -36,7 +35,7 @@ from core.schemes import (
 )
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/authentication/login/",
+    tokenUrl="/api/v1/authentication/login",
 )
 
 
@@ -55,7 +54,7 @@ async def get_users_data(
     return False
 
 
-async def check_register_data(
+async def check_recurring_data(
     user: RegisterSchema,
     session: Annotated[
         AsyncSession,
@@ -80,8 +79,39 @@ async def check_register_data(
 
     return user
 
+async def validate_auth_user(
+    userdata: LoginSchema,
+    session: Annotated[
+        AsyncSession,
+        Depends(db_control.session_getter)
+    ]
+) -> UserSchema:
+    unauthed_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="invalid username or password",
+    )
+
+    filters = create_model("username", username=(str, ...)); filters = filters(username=userdata.username)
+
+    if not (user := await user_get(session=session, filters=filters)):
+        raise unauthed_exc
+
+    if not validate_password(
+        password=userdata.password,
+        hashed_password=user.password,
+    ):
+        raise unauthed_exc
+
+    if not user.isActive:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="user inactive",
+        )
+
+    return user
+
 def get_current_token_payload(
-    token: str = Depends(oauth2_scheme),
+    token: str,
 ) -> dict:
     try:
         payload = decode_jwt(
@@ -127,9 +157,11 @@ class UserGetterFromToken:
 
     async def __call__(
         self,
-        payload: dict = Depends(get_current_token_payload),
+        token: str = Depends(oauth2_scheme),
         session: AsyncSession = Depends(db_control.session_getter),
-    ):
+    ) -> UserSchema:
+
+        payload = get_current_token_payload(token)
         validate_token_type(payload, self.token_type)
         return await get_user_by_token_sub(payload, session)
 
@@ -147,35 +179,3 @@ def get_current_active_auth_user(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="inactive user",
     )
-
-
-async def validate_auth_user(
-    userdata: LoginSchema,
-    session: Annotated[
-        AsyncSession,
-        Depends(db_control.session_getter)
-    ]
-) -> UserSchema:
-    unauthed_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="invalid username or password",
-    )
-
-    filters = create_model("username", username=(str, ...)); filters = filters(username=userdata.username)
-
-    if not (user := await user_get(session=session, filters=filters)):
-        raise unauthed_exc
-
-    if not validate_password(
-        password=userdata.password,
-        hashed_password=user.password,
-    ):
-        raise unauthed_exc
-
-    if not user.isActive:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="user inactive",
-        )
-
-    return user
