@@ -1,5 +1,5 @@
 from core.utils import connectionstate
-from manager import (
+from ..manager import (
     lobby_manager,
     Lobby,
     PlayerConnection
@@ -25,6 +25,7 @@ async def handle_move(lobby: Lobby, player: PlayerConnection, data: dict):
     payload = {
         "row": row,
         "col": col,
+        "board": lobby.game.get_board(),
         "symbol": player.symbol,
         **result
     }

@@ -59,6 +59,9 @@ class LobbyManager:
     def get_lobby(self, lobby_id: str) -> Optional[Lobby]:
         return self.lobbies.get(lobby_id)
 
+    def get_lobbies(self) -> Dict[str, Lobby]:
+        return self.lobbies
+
     def remove_lobby(self, lobby_id: str):
         if lobby_id in self.lobbies:
             del self.lobbies[lobby_id]

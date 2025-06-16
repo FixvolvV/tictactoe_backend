@@ -1,4 +1,4 @@
-from functools import wraps
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pydantic import (
@@ -44,7 +44,7 @@ async def user_add(session: AsyncSession, userdata: BaseModel) -> str:
 
 # Crud Операции для users
 async def user_get_by_id(session: AsyncSession, userid: str) -> UserSchema | None:
-    user = await UserCrud.find_one_or_none_by_id(session=session, data_id=userid)
+    user = await UserCrud.find_one_or_none_by_id(session=session, data_id=uuid.UUID(userid))
     if not user:
         return None
     return UserSchema.model_validate(user)
@@ -55,17 +55,17 @@ async def user_get(session: AsyncSession, filters: BaseModel) -> UserSchema | No
         return None
     return UserSchema.model_validate(user)
 
-async def user_get_all(session: AsyncSession, filters: BaseModel) -> UsersSchema:
+async def user_get_all(session: AsyncSession, filters: BaseModel | None) -> UsersSchema:
     users = await UserCrud.find_all(session=session, filters=filters)
     return UsersSchema(users=[UserSchema.model_validate(user) for user in users])
 
 async def user_update(session: AsyncSession, userid: str, update_data: BaseModel) -> None:
-    await UserCrud.update_one_by_id(session=session, data_id=userid, values=update_data)
+    await UserCrud.update_one_by_id(session=session, data_id=uuid.UUID(userid), values=update_data)
     await session.commit()
 
 
 async def user_delete(session: AsyncSession, userid: str)  -> None:
-    await UserCrud.delete_one_by_id(session=session, data_id=userid)
+    await UserCrud.delete_one_by_id(session=session, data_id=uuid.UUID(userid))
     await session.commit()
 
 
@@ -82,7 +82,7 @@ async def lobby_add(session: AsyncSession, lobbydata: BaseModel) -> str:
 
 
 async def lobby_get_by_id(session: AsyncSession, lobbyid: str) -> LobbySchema | None:
-    lobby = await LobbyCrud.find_one_or_none_by_id(session=session, data_id=lobbyid)
+    lobby = await LobbyCrud.find_one_or_none_by_id(session=session, data_id=uuid.UUID(lobbyid))
     await session.commit()
     return LobbySchema.model_validate(lobby)
 
@@ -91,16 +91,16 @@ async def lobby_get(session: AsyncSession, lobbydata: BaseModel) -> LobbySchema 
     await session.commit()
     return LobbySchema.model_validate(lobby)
 
-async def lobby_get_all(session: AsyncSession, filters: BaseModel) -> LobbiesSchema:
+async def lobby_get_all(session: AsyncSession, filters: BaseModel | None) -> LobbiesSchema:
     lobbies = await LobbyCrud.find_all(session=session, filters=filters)
     return LobbiesSchema(lobbies=[LobbySchema.model_validate(lobby) for lobby in lobbies])
 
 
 async def lobby_update(session: AsyncSession, lobbyid: str, update_data: BaseModel) -> None:
-    await LobbyCrud.update_one_by_id(session=session, data_id=lobbyid, values=update_data)
+    await LobbyCrud.update_one_by_id(session=session, data_id=uuid.UUID(lobbyid), values=update_data)
     await session.commit()
 
 
 async def lobby_delete(session: AsyncSession, lobbyid: str) -> None:
-    await LobbyCrud.delete_one_by_id(session=session, data_id=lobbyid)
+    await LobbyCrud.delete_one_by_id(session=session, data_id=uuid.UUID(lobbyid))
     await session.commit()

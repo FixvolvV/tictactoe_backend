@@ -33,13 +33,11 @@ PING_TIMEOUT = 20
 
 
 # Create http bearer for auto documentation
-http_bearer = HTTPBearer(auto_error=False)
 
 
 # Init auth router
 router = APIRouter(
-    tags=["Game"],
-    dependencies=[Depends(http_bearer)]
+    tags=["Game"]
 )
 
 async def ping_client(player: PlayerConnection):
@@ -112,10 +110,10 @@ async def websocket_game(
                 await handle_move(lobby, player, data)
 
             elif action == "leave":
-                await handle_disconnect(lobby, user.id)
+                await handle_disconnect(lobby, player)
 
     except WebSocketDisconnect:
-        await handle_disconnect(lobby, user.id)
+        await handle_disconnect(lobby, player)
 
     finally:
         ping_task.cancel()

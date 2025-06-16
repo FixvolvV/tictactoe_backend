@@ -1,6 +1,6 @@
 from core.utils import connectionstate
 
-from manager import (
+from ..manager import (
     Lobby,
     PlayerConnection
 )
