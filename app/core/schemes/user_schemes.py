@@ -82,9 +82,21 @@ class UserUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     username: str | None = None
-    password: str | None = None
     email: str | None = None
     profile: ProfileUpdateSchema | None = None
+
+class UserChangePass(BaseModel):
+    old_password: str
+    new_password: str
+
+    @field_validator('new_password')
+    def password_validator(cls, value):
+
+        if len(value) > 64:
+            raise ValueError("Password to big. The password for the maximum length is 64")
+        elif len(value) < 6:
+            raise ValueError("Password to small. The password for the minimum length is 6")
+        return value
 
 class AdminUserUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

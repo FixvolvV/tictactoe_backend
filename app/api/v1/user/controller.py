@@ -1,16 +1,17 @@
 from uuid import UUID
 from typing import Annotated
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from fastapi.responses import (
     Response,
     JSONResponse
 )
 from fastapi.security import HTTPBearer
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from pydantic import create_model
+from pydantic import BaseModel, create_model
 
 from api.v1.validators import(
     get_current_active_auth_user
@@ -19,6 +20,7 @@ from api.v1.validators import(
 from core.schemes import (
     UserSchema,
     UsersSchema,
+    UserChangePass,
     UserUpdateSchema
 )
 
@@ -34,7 +36,8 @@ from api.v1.crud import (
 )
 
 from core.utils import (
-    hash_password
+    hash_password,
+    validate_password
 )
 
 
@@ -122,6 +125,33 @@ async def user_get_id(
 
     return user
 
+@router.post(
+    "/change_password",
+    response_model=UserSchema
+)
+async def user_change_password(
+    data: UserChangePass,
+    user: Annotated[
+        UserSchema,
+        Depends(get_current_active_auth_user)
+    ],
+    session: Annotated[
+        AsyncSession,
+        Depends(db_control.session_getter)
+    ]
+):
+
+    if not validate_password(password=data.old_password, hashed_password=user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong Password"
+        )
+
+    update = create_model("", password=(str, ...)); update = update(password=hash_password(data.new_password).decode())
+
+    await user_update(session=session, userid=user.id, update_data=update)
+
+    return await user_get_by_id(session=session, userid=user.id) 
 
 # User PATCH ------<
 @router.patch(
@@ -140,9 +170,6 @@ async def user_updated(
         Depends(db_control.session_getter)
     ]
 ):
-    
-    if update.password:
-        update.password = hash_password(update.password).decode()
 
     await user_update(session=session, userid=user.id, update_data=update)
 
@@ -155,6 +182,7 @@ async def user_updated(
     response_class=JSONResponse
 )
 async def user_deleted(
+    password: str,
     user: Annotated[
         UserSchema,
         Depends(get_current_active_auth_user)
@@ -164,6 +192,12 @@ async def user_deleted(
         Depends(db_control.session_getter)
     ]
 ):
+
+    if not validate_password(password=password, hashed_password=user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong Password"
+        )
 
     await user_delete(session=session, userid=user.id)
     return JSONResponse(

@@ -44,7 +44,6 @@ router = APIRouter(
 # Lobby POST ------<  plug
 @router.post(
     "/create",
-    response_class=JSONResponse
 )
 async def lobby_create(
     lobbyname: str,
@@ -54,12 +53,9 @@ async def lobby_create(
     ]
 ):
 
-    lobby_manager.create_lobby(lobby_name=lobbyname) 
+    lobby_id = lobby_manager.create_lobby(lobby_name=lobbyname) 
 
-    return JSONResponse(
-        content=f"The lobby was created successfully\n Lobby Name: {lobbyname}",
-        status_code=status.HTTP_200_OK
-    )
+    return lobby_id
 
 
 def select_lobby(query_name: str | None):
@@ -72,14 +68,14 @@ def select_lobby(query_name: str | None):
             continue
 
         if query_name is not None:
-            if query_name.lower != value.lobby_data.name.lower:
+            if query_name.lower != value.name.lower:
                 continue
 
         lobby = {
-            "id": value.lobby_data.id,
-            "name": value.lobby_data.name,
-            "gametype": value.lobby_data.gametype,
-            "owner": value.lobby_data.players[0].user_data.username if len(value.lobby_data.players) != 0 else "Not defined"
+            "id": value.id,
+            "name": value.name,
+            "gametype": value.game_type,
+            "owner": value.owner_username
         }
 
         current_lobbies.append(lobby)
@@ -94,10 +90,8 @@ async def lobbies_checker(request: Request, query_name: str | None):
             if await request.is_disconnected():
                 break
 
-            event_data = {
-            "lobbies": select_lobby(query_name) # Отправляем весь текущий список
-            }
-
+            event_data = select_lobby(query_name) # Отправляем весь текущий список
+        
             # 3. Форматируем сообщение в SSE
             message = (
                 f"id: {message_id}\n"

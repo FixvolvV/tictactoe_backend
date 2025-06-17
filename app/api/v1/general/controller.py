@@ -47,10 +47,6 @@ router = APIRouter(
     response_model=Games
 )
 async def get_all_games(
-    verify: Annotated[
-        UserSchema,
-        Depends(get_current_active_auth_user)
-    ],
     session: Annotated[
         AsyncSession,
         Depends(db_control.session_getter)
@@ -58,7 +54,9 @@ async def get_all_games(
 ):
 
     active_games: int = len(lobby_manager.get_lobbies())
-    total_games: int = len(LobbiesSchema.model_dump(await lobby_get_all(session=session, filters=None)))
+    total_games: int = len(LobbiesSchema.model_dump(await lobby_get_all(session=session, filters=None))['lobbies'])
+
+    total_games += active_games
 
     return Games(
         active=active_games,

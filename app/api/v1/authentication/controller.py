@@ -57,16 +57,15 @@ class TokenInfo(BaseModel):
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     # Указываем корневой домен с точкой в начале
-    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+    COOKIE_DOMAIN = ".localhost" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
 
     response.set_cookie(
-        key="token",
+        key="access_token",
         value=access_token,
         httponly=True,
         secure=True,
-        samesite="lax",
-        max_age=settings.jwt.access_token_expire_minutes, # 1 hour for access token
-        path="/",
+        samesite="none",
+        max_age=settings.jwt.access_token_expire_minutes * 60, # 1 hour for access token
         domain=COOKIE_DOMAIN # Используем корневой домен
     )
     
@@ -75,16 +74,15 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
             value=refresh_token,
             httponly=True,
             secure=True,
-            samesite="lax",
-            max_age=settings.jwt.refresh_token_expire_days, # 7 days for refresh token
-            path="/",
+            samesite="none",
+            max_age=settings.jwt.refresh_token_expire_days * 24 * 60 * 60, # 7 days for refresh token
             domain=COOKIE_DOMAIN # Используем корневой домен
         )
 
 # Helper to clear cookies
 def clear_auth_cookies(response: Response):
-    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
-    response.delete_cookie(key="token", domain=COOKIE_DOMAIN)
+    COOKIE_DOMAIN = ".localhost" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+    response.delete_cookie(key="access_token", domain=COOKIE_DOMAIN)
     response.delete_cookie(key="refresh_token", domain=COOKIE_DOMAIN)
 
 

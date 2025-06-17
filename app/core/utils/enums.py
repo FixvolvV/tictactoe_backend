@@ -5,7 +5,7 @@ class roles(str, enum.Enum):
     ADMIN = 'Администратор'
 
 class gametype(str, enum.Enum):
-    INFINITY_TIC_TAC_TOE = "Бесконечные крестики нолики"
+    INFINITY_TIC_TAC_TOE = "Infinity Tic Tac Toe"
 
 class connectionstate(str, enum.Enum):
     WAITING = "waiting"

@@ -18,7 +18,7 @@ from core.schemes import UserSchema
 from api.v1.authentication.genjwt import ACCESS_TOKEN_TYPE, REFRESH_TOKEN_TYPE
 
 
-WEBSOCKET_ACCESS_TOKEN_COOKIE_NAME = "token"
+WEBSOCKET_ACCESS_TOKEN_COOKIE_NAME = "access_token"
 
 async def get_websocket_token_from_cookie(
     websocket: WebSocket,

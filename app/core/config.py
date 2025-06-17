@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from typing import List
+from typing import Sequence
 from pydantic import (
     BaseModel,
     PostgresDsn
@@ -13,7 +13,7 @@ from pydantic_settings import (
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 class RunConfig(BaseModel):
-    host: str = "0.0.0.0"
+    host: str = "127.0.0.1"
     port: int = 8000
 
 
@@ -29,12 +29,12 @@ class AuthJWTConfig(BaseModel):
     private_key_path: Path = BASE_DIR / "certs" / "jwt-private.pem"
     public_key_path: Path = BASE_DIR / "certs" / "jwt-public.pem"
     algorithm: str = "RS256"
-    access_token_expire_minutes: int = 15
+    access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 5
 
 
 class HTTPCORS(BaseModel):
-    urls: List[str] | None = None
+    urls: Sequence[str] | None = None
 
 
 class ApiV1Prefix(BaseModel):

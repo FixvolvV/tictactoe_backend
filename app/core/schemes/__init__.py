@@ -10,6 +10,7 @@ __all__ = (
     "LoginSchema",
     "JWTCreateSchema",
     "UserUpdateSchema",
+    "UserChangePass",
     "AdminUserUpdateSchema",
     "ProfileUpdateSchema",
     "AdminProfileUpdateSchema",
@@ -29,6 +30,7 @@ from .user_schemes import (
     LoginSchema,
     JWTCreateSchema,
     UserUpdateSchema,
+    UserChangePass,
     AdminUserUpdateSchema,
 )
 
