@@ -9,6 +9,7 @@ from fastapi.responses import (
 from fastapi.security import HTTPBearer
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from starlette import status
 
 from pydantic import BaseModel, create_model
@@ -171,9 +172,15 @@ async def user_updated(
     ]
 ):
 
-    await user_update(session=session, userid=user.id, update_data=update)
+    try:
+        await user_update(session=session, userid=user.id, update_data=update)
 
-    return await user_get_by_id(session=session, userid=user.id) 
+        return await user_get_by_id(session=session, userid=user.id)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or email data is listed with already known data" 
+        )
 
 
 # User DELETE ------<

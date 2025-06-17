@@ -34,7 +34,7 @@ class LobbySchema(BaseModel):
     gametype: gametype
     gametime: str
     timecreate: datetime | None = None
-    players: List[uuid.UUID] # <-- Список UUID-ов игроков
+    players: List[UserSchema | uuid.UUID] # <-- Список UUID-ов игроков
     
     @field_validator("gametime", mode="before")
     def parse_duration(cls, v: timedelta) -> str:
@@ -50,7 +50,7 @@ class LobbySchema(BaseModel):
 class LobbiesSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    lobbies: list[LobbySchema | None]
+    lobbies: list[LobbySchema]
 
 class InitLobbySchema(BaseModel):
 

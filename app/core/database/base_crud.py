@@ -284,7 +284,7 @@ class BaseCrud(Generic[T]):
                 stmt = stmt.options(opt)
 
             result = await session.execute(stmt)
-            return result.scalars(cls.model).all() #pyright:ignore
+            return list(result.scalars().unique().all()) 
 
         except SQLAlchemyError as e:
             print(f"Error occurred during find_all: {e}")

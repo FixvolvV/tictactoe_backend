@@ -43,7 +43,8 @@ class Lobby(Base):
     )
     winner_user: Mapped[Optional["User"]] = relationship(
         back_populates="won_lobbies",
-        foreign_keys=[winner_id]
+        foreign_keys=[winner_id],
+        lazy="joined"
     )
 
     field: Mapped[dict] = mapped_column(JSON)
@@ -53,5 +54,6 @@ class Lobby(Base):
 
     players: Mapped[List["User"]] = relationship(
         secondary=user_lobby_association,
-        back_populates="lobbies"
+        back_populates="lobbies",
+        lazy="joined"
     )

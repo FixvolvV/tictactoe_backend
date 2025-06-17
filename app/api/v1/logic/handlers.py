@@ -245,7 +245,6 @@ async def save_game_results(lobby: Lobby):
                     "players": players_ids,           # player_ids[0] if len(player_ids) > 0 else None,          
                 }
                 
-                print(lobby_data)
                 # Динамически создаем Pydantic модель, соответствующую LobbySchema
                 # (которая теперь использует строковые ID для игроков/победителя)
                 
