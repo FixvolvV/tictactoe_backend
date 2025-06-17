@@ -10,8 +10,8 @@ class ProfileSchema(BaseModel):
     
     user_id: str | None = None
     icon: str | None
-    wins: int | None = 0
-    loses: int | None = 0
+    wins: int  = 0
+    loses: int  = 0
     visibility: bool | None = True
 
     @field_validator("user_id", mode='before')

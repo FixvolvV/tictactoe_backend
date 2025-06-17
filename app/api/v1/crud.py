@@ -1,5 +1,10 @@
 import uuid
+
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from typing import List
 
 from pydantic import (
     BaseModel,
@@ -29,6 +34,35 @@ class ProfileCrud(BaseCrud[model.Profile]):
 
 class LobbyCrud(BaseCrud[model.Lobby]):
     model = model.Lobby
+
+    # Переопределяем метод add специально для Lobby, чтобы обрабатывать отношение 'players'
+    @classmethod
+    async def add(cls, session: AsyncSession, values: BaseModel):
+        values_dict = values.model_dump(exclude_unset=True)
+
+        player_ids_from_schema: List[uuid.UUID] = values_dict.pop("players", [])
+        player_objects: List[model.User] = []
+        if player_ids_from_schema:
+            stmt_players = select(model.User).where(model.User.id.in_(player_ids_from_schema))
+            result_players = await session.execute(stmt_players)
+            player_objects = list(result_players.scalars().all())
+
+            if len(player_objects) != len(player_ids_from_schema):
+                print(f"Warning: Not all players found for lobby creation. Expected {len(player_ids_from_schema)}, found {len(player_objects)}")
+        values_dict["players"] = player_objects 
+
+        instance = cls.model(**values_dict)
+        session.add(instance)
+        try:
+            await session.flush() 
+            await session.commit() 
+            await session.refresh(instance) 
+            return instance
+        except SQLAlchemyError as e:
+            await session.rollback()
+            print(f"Error occurred during LobbyCrud.add: {e}")
+            raise e
+
 
 
 # Crud Добавление User и Profile

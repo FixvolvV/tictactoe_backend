@@ -1,3 +1,4 @@
+import uuid
 from datetime import (
     datetime,
     time,
@@ -26,25 +27,21 @@ from core.utils import (
 class LobbySchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: uuid.UUID
     name: str
-    players: List[UserSchema]
-    winner: UserSchema
+    winner_id: uuid.UUID
     field: Dict[str, str]
     gametype: gametype
     gametime: str
-    timecreate: datetime
-
-    @field_validator("id", mode='before')
-    def to_str(cls, value):
-        if value:
-            return str(value)
+    timecreate: datetime | None = None
+    players: List[uuid.UUID] # <-- Список UUID-ов игроков
     
     @field_validator("gametime", mode="before")
     def parse_duration(cls, v: timedelta) -> str:
-
+        if isinstance(v, str): # Если приходит уже строка, ничего не делаем
+            return v
         total_seconds = int(v.total_seconds())
-
+        
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         seconds = total_seconds % 60
