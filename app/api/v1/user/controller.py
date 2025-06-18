@@ -58,7 +58,7 @@ router = APIRouter(
 
 # User GET ------<
 @router.get(
-    "/",
+    "",
     response_model=UserSchema
 )
 async def user_get(
@@ -156,7 +156,7 @@ async def user_change_password(
 
 # User PATCH ------<
 @router.patch(
-    "/",
+    "",
     response_model=UserSchema
 )
 async def user_updated(
@@ -185,7 +185,7 @@ async def user_updated(
 
 # User DELETE ------<
 @router.delete(
-    "/",
+    "",
     response_class=JSONResponse
 )
 async def user_deleted(
