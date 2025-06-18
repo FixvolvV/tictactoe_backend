@@ -41,32 +41,12 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-
-    current_dir = Path(__file__).parent
-
-    # Полные пути к файлам сертификатов
-    ssl_keyfile_path = current_dir / "localhost+2-key.pem"
-    ssl_certfile_path = current_dir / "localhost+2.pem"
-
-    # Проверка существования файлов (опционально, но хорошая практика)
-    if not ssl_keyfile_path.exists():
-        print(f"Ошибка: Не найден файл приватного ключа: {ssl_keyfile_path}")
-        exit(1)
-    if not ssl_certfile_path.exists():
-        print(f"Ошибка: Не найден файл сертификата: {ssl_certfile_path}")
-        exit(1)
-
-    print("Запуск FastAPI на https://localhost:8000 с использованием SSL-сертификатов:")
-    print(f"  Key: {ssl_keyfile_path}")
-    print(f"  Cert: {ssl_certfile_path}")
-
-
     uvicorn.run(
         "main:app",
         host=settings.run.host,
         port=settings.run.port,
-        ssl_keyfile=str(ssl_keyfile_path), # uvicorn.run ожидает строку для путей
-        ssl_certfile=str(ssl_certfile_path),
         reload=True,
+        docs_url=None,
+        redoc_url=None
     )
 
