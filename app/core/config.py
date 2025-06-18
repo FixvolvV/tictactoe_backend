@@ -13,13 +13,13 @@ from pydantic_settings import (
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 class RunConfig(BaseModel):
-    host: str = "127.0.0.1"
-    port: int = 8000
+    host: str = "0.0.0.0"
+    port: int = 8030
     mode: str = "development"
 
 class GunicornConfig(BaseModel):
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8030
     workers: int = 1
     timeout: int = 900
 
