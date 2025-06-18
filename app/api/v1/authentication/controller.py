@@ -57,7 +57,7 @@ class TokenInfo(BaseModel):
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
     # Указываем корневой домен с точкой в начале
-    COOKIE_DOMAIN = ".localhost" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
 
     response.set_cookie(
         key="access_token",
@@ -81,7 +81,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
 
 # Helper to clear cookies
 def clear_auth_cookies(response: Response):
-    COOKIE_DOMAIN = ".localhost" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
+    COOKIE_DOMAIN = ".fixvolvv.ru" # <<< ИЗМЕНЕНО ДЛЯ ПОДДОМЕНОВ!
     response.delete_cookie(key="access_token", domain=COOKIE_DOMAIN)
     response.delete_cookie(key="refresh_token", domain=COOKIE_DOMAIN)
 
