@@ -11,5 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем всё остальное
 COPY app/ .
 
+EXPOSE 8030
+
 # Применяем миграции Alembic и запускаем приложение
 CMD ["sh", "-c", "alembic upgrade head && python run_main.py"]
