@@ -73,7 +73,6 @@ async def handle_disconnect(lobby: Lobby, player_to_disconnect: PlayerConnection
         elif len(lobby.players) == 0:
             if was_playing and lobby.game and lobby.start_time:
                 lobby.end_game(None) 
-                await save_game_results(lobby) 
                 print(f"Lobby {lobby.id} game ended inconclusively and results saved due to no players remaining.")
 
             if lobby.id in lobby_manager.lobbies:
