@@ -25,6 +25,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(
     lifespan=lifespan,
+    docs_url=None if settings.run.mode == "production" else "/docs", #disables docs
+    redoc_url=None if settings.run.mode == "production" else "/redoc", #disables redoc
+    openapi_url=None if settings.run.mode == "production" else "/openapi.json", #disables openapi.json suggested by tobias comment.
 )
 
 
@@ -45,8 +48,6 @@ if __name__ == "__main__":
         "main:app",
         host=settings.run.host,
         port=settings.run.port,
-        reload=True,
-        docs_url=None,
-        redoc_url=None
+        reload=True
     )
 

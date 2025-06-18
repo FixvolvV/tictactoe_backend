@@ -15,6 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 class RunConfig(BaseModel):
     host: str = "127.0.0.1"
     port: int = 8000
+    mode: str = "development"
 
 class GunicornConfig(BaseModel):
     host: str = "0.0.0.0"
